@@ -1,5 +1,6 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:to_do_app/services/theme_services.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,7 +18,7 @@ class _HomePageState extends State<HomePage> {
     print(Theme.of(context).primaryColor);
     return Scaffold(
       appBar: _appBar(),
-      body: Column(
+      body: const Column(
         children: [
           Text("Theme Datas",
           style: TextStyle(
@@ -33,14 +34,18 @@ class _HomePageState extends State<HomePage> {
 
 _appBar(){
   return AppBar(
+    elevation: 0,
     leading: GestureDetector(
       onTap:(){
         ThemeService().switchTheme();
       },
-      child: Icon(Icons.nightlight_round, size: 20,),
+      child: Icon(Get.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round, size: 20,
+      color: Get.isDarkMode ? Colors.white : Colors.black),
     ),
-    actions: [
-      Icon(Icons.person, size: 20,),
+    actions: const [
+      CircleAvatar(
+        backgroundImage: AssetImage("images/profile.jpg"),
+      ),
       SizedBox(width: 20,),
     ],
   );

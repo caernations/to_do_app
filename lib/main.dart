@@ -7,7 +7,7 @@ import 'package:to_do_app/ui/theme.dart';
 
 Future<void> main() async {
   await GetStorage.init();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         darkTheme: Themes.dark,
         themeMode: ThemeService().theme,
 
-        home: HomePage()
+        home: const HomePage()
     );
   }
 }
