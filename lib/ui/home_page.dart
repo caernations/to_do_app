@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:to_do_app/services/theme_services.dart';
+import 'package:to_do_app/ui/theme.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,12 +20,23 @@ class _HomePageState extends State<HomePage> {
     print(Theme.of(context).primaryColor);
     return Scaffold(
       appBar: _appBar(),
-      body: const Column(
+      body: Column(
         children: [
-          Text("Theme Datas",
-          style: TextStyle(
-            fontSize: 30
-          ),
+          Row(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(DateFormat.yMMMd().format(DateTime.now()),
+                    style: subHeadingStyle,
+                    ),
+                    Text("Today", style: headingStyle,)
+                  ],
+                ),
+              ),
+            ],
           )
         ],
       ),
