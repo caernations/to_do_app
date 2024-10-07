@@ -1,22 +1,22 @@
 class Task {
-  int? id;
-  String? title;
-  String? note;
-  bool? isCompleted;
-  DateTime? date;
-  String? startTime;
-  String? endTime;
-  int? color;
+  int id;
+  String title;
+  String note;
+  bool isCompleted;
+  DateTime date;
+  String startTime;
+  String endTime;
+  int color;
 
   Task({
-    this.id,
-    this.title,
-    this.note,
-    this.isCompleted,
-    this.date,
-    this.startTime,
-    this.endTime,
-    this.color,
+    required this.id,
+    required this.title,
+    required this.note,
+    required this.isCompleted,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+    required this.color,
   });
 
   // Factory method to create a Task from a map (for fetching from database)
