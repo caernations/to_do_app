@@ -19,6 +19,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final List<Color> taskColors = [
+    softBluishClr,  // Color for parameter 0
+    yellowClr,  // Color for parameter 1
+    pinkclr,    // Color for parameter 2
+  ];
+
   DateTime _selectedDate = DateTime.now();
   List<Task> listTask = [];
 
@@ -229,96 +235,167 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-  Widget _taskTile(Task task) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title
-            Text(
-              task.title ?? 'No Title',
-              style: GoogleFonts.lato(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+  void _showTaskDetailsDialog(Task task) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            task.title ?? 'No Title',
+            style: GoogleFonts.lato(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-            const SizedBox(height: 8),
-            // Description
-            Text(
-              task.note ?? 'No Description',
-              style: GoogleFonts.lato(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Due Date
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 18,
-                  color: Colors.grey[600],
-                ),
-                const SizedBox(width: 8),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
                 Text(
-                  task.endTime ?? 'No Due Date',
+                  task.note ?? 'No Description',
                   style: GoogleFonts.lato(
-                    fontSize: 14,
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Due Date: ${task.endTime ?? 'No Due Date'}',
+                  style: GoogleFonts.lato(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Completed: ${task.isCompleted == true ? 'Yes' : 'No'}',
+                  style: GoogleFonts.lato(
+                    fontSize: 16,
                     color: Colors.grey[600],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            // Completion Status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Completed:',
-                  style: GoogleFonts.lato(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                Checkbox(
-                  value: task.isCompleted ?? false,
-                  onChanged: (bool? newValue) async {
-                    setState(() {
-                      task.isCompleted = newValue!;
-                    });
-
-                    // Call the function to update task status in backend
-                    await _updateTaskStatus(task.id, task.isCompleted);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.redAccent),
-                  onPressed: () async {
-                    bool shouldDelete = await _showDeleteConfirmationDialog(
-                        task.title);
-                    if (shouldDelete) {
-                      _deleteTask(task.id); // Delete task from database
-                    }
-                  },
-                ),
-              ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(
+                'Close',
+                style: TextStyle(color: primaryClr),
+              ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+
+
+  Widget _taskTile(Task task) {
+    return GestureDetector( // Wrap with GestureDetector to capture taps
+      onTap: () {
+        _showTaskDetailsDialog(task); // Show the dialog when tile is tapped
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        elevation: 4,
+        color: taskColors[task.color], // Set background color based on colorIndex
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Title
+              Text(
+                task.title ?? 'No Title',
+                style: GoogleFonts.lato(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black, // Set text color for better visibility
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Description
+              Text(
+                task.note ?? 'No Description',
+                style: GoogleFonts.lato(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Due Date
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 18,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    task.endTime ?? 'No Due Date',
+                    style: GoogleFonts.lato(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Completion Status
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Completed:',
+                    style: GoogleFonts.lato(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  Checkbox(
+                    value: task.isCompleted ?? false,
+                    onChanged: (bool? newValue) async {
+                      setState(() {
+                        task.isCompleted = newValue!;
+                      });
+
+                      // Call the function to update task status in backend
+                      await _updateTaskStatus(task.id, task.isCompleted);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.redAccent),
+                    onPressed: () async {
+                      bool shouldDelete = await _showDeleteConfirmationDialog(task.title);
+                      if (shouldDelete) {
+                        _deleteTask(task.id); // Delete task from database
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+
 
 // Function to update task status in backend
   Future<void> _updateTaskStatus(int? taskId, bool? isCompleted) async {

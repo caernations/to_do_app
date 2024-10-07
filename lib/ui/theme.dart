@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
-const Color bluishClr = Color(0xFF4e5ae8);
-const Color yellowClr = Color (0xFFFFB746);
-const Color pinkclr = Color(0xFFFf4667);
+const Color bluishClr = Color(0xFFB7C9F7); // Softer blue
+const Color softBluishClr = Color(0xFFE0E7FF); // Softer blue
+const Color yellowClr = Color(0xFFFFF8E7); // Softer yellow
+const Color pinkclr = Color(0xFFFFD1D7); // Softer pink
 const Color white = Colors.white;
 const primaryClr = bluishClr;
 const Color darkGreyClr = Color (0xFF121212);
