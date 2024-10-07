@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           _addTaskBar(),
           _addDateBar(),
+          SizedBox(height: 20,),
           Expanded(child: _showTaskList()),  // Use Expanded here
         ],
       ),
@@ -133,6 +134,51 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Delete task from the server
+  _deleteTask(int? taskId) async {
+    setState(() {
+      _isLoading = true; // Show loading indicator while deleting
+    });
+    try {
+      final response = await http.delete(Uri.parse(
+          'https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/delete-to_do_list/$taskId'));
+      if (response.statusCode == 200) {
+        print('Task deleted successfully');
+        // After deleting, refresh the task list
+        _fetchToDo();
+      } else {
+        print('Failed to delete task with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error deleting task: $e");
+    } finally {
+      setState(() {
+        _isLoading = false; // Hide loading indicator after deletion
+      });
+    }
+  }
+
+  // Confirm delete dialog
+  Future<bool> _showDeleteConfirmationDialog(String? taskTitle) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Task'),
+        content: Text('Are you sure you want to delete the task "$taskTitle"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    ) ??
+        false; // Return false if dialog is dismissed
+  }
 
   _appBar() {
     return AppBar(
@@ -171,14 +217,88 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _taskTile(Task task) {
-    return ListTile(
-      title: Text(task.title ?? 'No Title'),
-      subtitle: Text(task.note ?? 'No Description'),
-      trailing: IconButton(
-        icon: Icon(Icons.delete),
-        onPressed: () {
-          // Add delete functionality here
-        },
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title
+            Text(
+              task.title ?? 'No Title',
+              style: GoogleFonts.lato(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Description
+            Text(
+              task.note ?? 'No Description',
+              style: GoogleFonts.lato(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Due Date
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 18,
+                  color: Colors.grey[600],
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  task.endTime ?? 'No Due Date',
+                  style: GoogleFonts.lato(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Completion Status
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Completed:',
+                  style: GoogleFonts.lato(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                Checkbox(
+                  value: task.isCompleted ?? false,
+                  onChanged: (bool? newValue) {
+                    setState(() {
+                      task.isCompleted = newValue!;
+                      // Add logic to update task status in backend
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.redAccent),
+                  onPressed: () async {
+                    bool shouldDelete = await _showDeleteConfirmationDialog(task.title);
+                    if (shouldDelete) {
+                      _deleteTask(task.id); // Delete task from database
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
