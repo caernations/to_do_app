@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:to_do_app/ui/theme.dart';
 import 'package:to_do_app/ui/widgets/input_field.dart';
-final base_url = Uri.parse('https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/insert-to_do_list');
+final base_url = Uri.parse('https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/insert-to_do_list');
 
 class AddTaskPage extends StatefulWidget {
   const AddTaskPage({Key? key}) : super(key: key);
@@ -103,7 +103,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
       // Kirim task ke API Supabase
       final response = await http.post(
-        Uri.parse('https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/insert-to_do_list'),
+        Uri.parse('https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/insert-to_do_list'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'sbp_60f95df07af3b87486bcc73956b5dfd0df9aea9d'

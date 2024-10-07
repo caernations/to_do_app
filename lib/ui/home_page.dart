@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:to_do_app/services/theme_services.dart';
 import 'package:to_do_app/ui/add_task_bar.dart';
 import 'package:to_do_app/ui/theme.dart';
+import 'package:to_do_app/ui/update_task.dart';
 import 'package:to_do_app/ui/widgets/button.dart';
 import 'package:to_do_app/services/models.dart';
 import 'package:http/http.dart' as http;
@@ -20,14 +21,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final List<Color> taskColors = [
-    softBluishClr,  // Color for parameter 0
-    yellowClr,  // Color for parameter 1
-    pinkclr,    // Color for parameter 2
+    softBluishClr,
+    yellowClr,
+    pinkclr,
   ];
 
   DateTime _selectedDate = DateTime.now();
   List<Task> listTask = [];
-
   var _isLoading = false;
 
   @override
@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           _addTaskBar(),
           _addDateBar(),
-          SizedBox(height: 20,),
+          const SizedBox(height: 10),
           Expanded(child: _showTaskList()), // Use Expanded here
         ],
       ),
@@ -62,14 +62,14 @@ class _HomePageState extends State<HomePage> {
         selectionColor: primaryClr,
         selectedTextColor: Colors.white,
         dateTextStyle: GoogleFonts.lato(
-            textStyle: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.w600, color: Colors.grey)),
+          textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.grey),
+        ),
         dayTextStyle: GoogleFonts.lato(
-            textStyle: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey)),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey),
+        ),
         monthTextStyle: GoogleFonts.lato(
-            textStyle: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey)),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
+        ),
         onDateChange: (date) {
           setState(() {
             _selectedDate = date; // Make sure state updates on date change
@@ -80,22 +80,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   _fetchToDo() async {
-    print('Fetching To-Do tasks');
     setState(() {
       _isLoading = true;
     });
     try {
       final response = await http.get(Uri.parse(
-          'https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/to_do_list'));
+          'https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/to_do_list'));
       if (response.statusCode == 200) {
-        print('Response received');
         List<dynamic> jsonData = jsonDecode(response.body);
         setState(() {
           listTask = jsonData.map((task) => Task.fromMap(task)).toList();
         });
       } else {
         print('Failed with status code: ${response.statusCode}');
-        print(response.body);
       }
     } catch (e) {
       print("Error fetching tasks: $e");
@@ -107,7 +104,19 @@ class _HomePageState extends State<HomePage> {
 
   _addTaskBar() {
     return Container(
-      margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? Colors.grey[900] : Colors.white, // Change background for dark mode
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Get.isDarkMode ? Colors.black54 : Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 10,
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -116,26 +125,44 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(
                 DateFormat.yMMMd().format(DateTime.now()),
-                style: subHeadingStyle,
+                style: GoogleFonts.lato(
+                  fontSize: 16,
+                  color: Get.isDarkMode ? Colors.white70 : Colors.grey, // Adjust text color
+                ),
               ),
+              const SizedBox(height: 4),
               Text(
                 "Today",
-                style: headingStyle,
-              )
+                style: GoogleFonts.lato(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Get.isDarkMode ? Colors.white : Colors.black, // Adjust text color
+                ),
+              ),
             ],
           ),
           ElevatedButton(
             onPressed: () async {
-              // Navigate to AddTaskPage and wait for the result
               final result = await Get.to(() => const AddTaskPage());
-
-              // If a task was successfully added, refresh the task list
               if (result == true) {
                 _fetchToDo();
               }
             },
-            child: Text("+ Add Task"),
-          )
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryClr,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              "+ Add Task",
+              style: GoogleFonts.lato(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -148,7 +175,7 @@ class _HomePageState extends State<HomePage> {
     });
     try {
       final response = await http.delete(Uri.parse(
-          'https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/delete-to_do_list/$taskId'));
+          'https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/delete-to_do_list/$taskId'));
       if (response.statusCode == 200) {
         print('Task deleted successfully');
         // After deleting, refresh the task list
@@ -213,18 +240,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showTaskList() {
-    // Filter tasks by selected date
     List<Task> filteredTasks = listTask.where((task) {
-      // Convert the task date to a String and then parse it back to DateTime
-      DateTime taskDate = task.date ?? DateTime.now(); // Use a default value if task.date is null
-      String formattedTaskDate = DateFormat.yMd().format(taskDate); // Convert DateTime to String
+      DateTime taskDate = task.date ?? DateTime.now();
+      String formattedTaskDate = DateFormat.yMd().format(taskDate);
       return formattedTaskDate == DateFormat.yMd().format(_selectedDate);
     }).toList();
 
     return _isLoading
-        ? Center(
-      child: CircularProgressIndicator(), // Display loading animation
-    )
+        ? Center(child: CircularProgressIndicator())
         : filteredTasks.isEmpty
         ? Center(child: Text("No tasks for the selected date."))
         : ListView.builder(
@@ -297,12 +320,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-
   Widget _taskTile(Task task) {
-    return GestureDetector( // Wrap with GestureDetector to capture taps
+    return GestureDetector(
       onTap: () {
-        _showTaskDetailsDialog(task); // Show the dialog when tile is tapped
+        _showTaskDetailsDialog(task);
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -310,7 +331,7 @@ class _HomePageState extends State<HomePage> {
           borderRadius: BorderRadius.circular(15),
         ),
         elevation: 4,
-        color: taskColors[task.color], // Set background color based on colorIndex
+        color: taskColors[task.color],
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -319,52 +340,34 @@ class _HomePageState extends State<HomePage> {
               // Title
               Text(
                 task.title ?? 'No Title',
-                style: GoogleFonts.lato(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black, // Set text color for better visibility
-                ),
+                style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               const SizedBox(height: 8),
               // Description
               Text(
                 task.note ?? 'No Description',
-                style: GoogleFonts.lato(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: GoogleFonts.lato(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 12),
               // Due Date
               Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    size: 18,
-                    color: Colors.grey[600],
-                  ),
+                  Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey[600]),
                   const SizedBox(width: 8),
                   Text(
                     task.endTime ?? 'No Due Date',
-                    style: GoogleFonts.lato(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: GoogleFonts.lato(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              // Completion Status
+              // Completion Status and Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Completed:',
-                    style: GoogleFonts.lato(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[600],
-                    ),
+                    style: GoogleFonts.lato(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[600]),
                   ),
                   Checkbox(
                     value: task.isCompleted ?? false,
@@ -372,9 +375,18 @@ class _HomePageState extends State<HomePage> {
                       setState(() {
                         task.isCompleted = newValue!;
                       });
-
-                      // Call the function to update task status in backend
                       await _updateTaskStatus(task.id, task.isCompleted);
+                    },
+                  ),
+                  // Update Button
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      Get.to(() => UpdateTaskPage(task: task))?.then((result) {
+                        if (result == true) {
+                          _fetchToDo();
+                        }
+                      });
                     },
                   ),
                   IconButton(
@@ -382,7 +394,7 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () async {
                       bool shouldDelete = await _showDeleteConfirmationDialog(task.title);
                       if (shouldDelete) {
-                        _deleteTask(task.id); // Delete task from database
+                        _deleteTask(task.id);
                       }
                     },
                   ),
@@ -397,6 +409,7 @@ class _HomePageState extends State<HomePage> {
 
 
 
+
 // Function to update task status in backend
   Future<void> _updateTaskStatus(int? taskId, bool? isCompleted) async {
     try {
@@ -405,7 +418,7 @@ class _HomePageState extends State<HomePage> {
 
       final response = await http.patch(
         Uri.parse(
-            'https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/update-to_do_list/$taskId'),
+            'https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/update-to_do_list/$taskId'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'sbp_60f95df07af3b87486bcc73956b5dfd0df9aea9d'
