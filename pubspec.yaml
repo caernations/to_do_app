@@ -40,8 +40,7 @@ dependencies:
   intl:
   google_fonts:
   date_picker_timeline:
-
-
+  http:
 
 dev_dependencies:
   flutter_test:

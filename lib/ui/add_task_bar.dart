@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:to_do_app/services/models.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:to_do_app/ui/theme.dart';
 import 'package:to_do_app/ui/widgets/input_field.dart';
-
-import '../services/theme_services.dart';
+final base_url = Uri.parse('https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/insert-to_do_list');
 
 class AddTaskPage extends StatefulWidget {
   const AddTaskPage({Key? key}) : super(key: key);
@@ -15,6 +17,7 @@ class AddTaskPage extends StatefulWidget {
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
+
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
@@ -22,6 +25,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
 
   int _selectedColor = 0;
+  var _isLoading = false;
   @override
   Widget build (BuildContext context) {
     return Scaffold(
@@ -34,8 +38,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
             children: [
               Text("Add Task",
               style: headingStyle,),
-              InputField(title: "Title", hint: "Enter your title"),
-              InputField(title: "Note", hint: "Enter your Note"),
+              InputField(title: "Title", hint: "Enter your title", controller: _titleController,),
+              InputField(title: "Note", hint: "Enter your Note", controller: _noteController,),
               InputField(title: "Date", hint: DateFormat.yMd().format(_selectedDate),
               widget: IconButton(
                 icon: Icon(Icons.calendar_today_outlined,
@@ -61,8 +65,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 children: [
                   _colorPalette(),
                   ElevatedButton(
-                    onPressed: () { Get.back(); },
-                    child: Text("Create Task"),
+                    onPressed: () { _validateData(); },
+                    child: _isLoading ? CircularProgressIndicator() : Text("Create Task"),
                   )
                 ],
               )
@@ -73,9 +77,65 @@ class _AddTaskPageState extends State<AddTaskPage> {
     );
   }
 
-  _validateData() {
+  _validateData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
+      // Cetak task ke terminal
+      print("Task Title: ${_titleController.text}");
+      print("Task Note: ${_noteController.text}");
+      print("Task Date: ${DateFormat.yMd().format(_selectedDate)}");
+      print("Start Time: $_startTime");
+      print("End Time: $_endTime");
+      print("Color: $_selectedColor");
 
+      // Buat Task Map untuk dikirim ke API
+      Map<String, dynamic> task = {
+        "title": _titleController.text,
+        "note": _noteController.text,
+        "date": _selectedDate.toIso8601String(),
+        "start_time": _startTime,
+        "end_time": _endTime,
+        "color": _selectedColor
+      };
+
+      // Kirim task ke API Supabase
+      final response = await http.post(
+        Uri.parse('https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/insert-to_do_list'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'sbp_60f95df07af3b87486bcc73956b5dfd0df9aea9d'
+        },
+        body: jsonEncode(task),
+      );
+
+      print(response.statusCode);
+
+      // Cek response dari API
+      if (response.statusCode != null) {
+        print("Task successfully added to the database.");
+        // Navigate back to home page and pass a signal to refresh the task list
+        Get.back(result: true);
+      } else {
+        print("Failed to add task. ${response.body}");
+      }
+    } else {
+      // Tampilkan error jika input tidak valid
+      Get.snackbar(
+        "Required",
+        "All fields required!",
+        snackPosition: SnackPosition.BOTTOM,
+        colorText: pinkclr,
+        backgroundColor: Colors.white,
+        icon: Icon(Icons.warning_amber_rounded, color: Colors.red,),
+      );
+    } setState(() {
+      _isLoading = false;
+    });
   }
+
+
 
   _colorPalette() {
     return Column(
@@ -179,5 +239,24 @@ class _AddTaskPageState extends State<AddTaskPage> {
             minute: int.parse(_startTime.split(":")[1].split(" ")[0])
         )
     );
+  }
+
+  _fetchToDo() async {
+    try {
+      final response = await http.get(base_url);
+      Task data;
+      if (response.statusCode == 200) {
+        // If server returns OK response, parse the JSON
+        final jsonData = json.decode(response.body);
+        setState(() {
+          data = Task.fromMap(jsonData); // For example, showing a 'title' field
+        });
+      }
+    } catch (e) {
+      print("Error: $e");
+
+    }
+
+
   }
 }
