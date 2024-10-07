@@ -78,11 +78,11 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   _validateData() async {
+    // TODO: Validate data (input fields can't be empty)
     setState(() {
       _isLoading = true;
     });
     if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
-      // Cetak task ke terminal
       print("Task Title: ${_titleController.text}");
       print("Task Note: ${_noteController.text}");
       print("Task Date: ${DateFormat.yMd().format(_selectedDate)}");
@@ -90,7 +90,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
       print("End Time: $_endTime");
       print("Color: $_selectedColor");
 
-      // Buat Task Map untuk dikirim ke API
       Map<String, dynamic> task = {
         "title": _titleController.text,
         "note": _noteController.text,
@@ -101,7 +100,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
         "color": _selectedColor
       };
 
-      // Kirim task ke API Supabase
       final response = await http.post(
         Uri.parse('https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/insert-to_do_list'),
         headers: {
@@ -113,16 +111,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
       print(response.statusCode);
 
-      // Cek response dari API
       if (response.statusCode != null) {
         print("Task successfully added to the database.");
-        // Navigate back to home page and pass a signal to refresh the task list
         Get.back(result: true);
       } else {
         print("Failed to add task. ${response.body}");
       }
     } else {
-      // Tampilkan error jika input tidak valid
       Get.snackbar(
         "Required",
         "All fields required!",
@@ -136,9 +131,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
     });
   }
 
-
-
   _colorPalette() {
+    // TODO: Select color for task list container
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -178,6 +172,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   _appBar() {
+    // TODO: Define the appbar
     return AppBar(
       elevation: 0,
       leading: GestureDetector(
@@ -198,6 +193,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   _getDateFromUser() async {
+    // TODO: Input date for task
     DateTime ? _pickerDate = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
@@ -216,6 +212,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   _getTimeFromUser(bool isStartTime) async {
+    // TODO: Input time for task
     var _pickedTime = await _showTimePicker();
     String _formattedTime = _pickedTime.format(context);
     if (_pickedTime == null) {
@@ -232,6 +229,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   _showTimePicker() {
+    // TODO: Input time for task
     return showTimePicker(
         initialEntryMode: TimePickerEntryMode.input,
         context: context,
@@ -243,14 +241,14 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   _fetchToDo() async {
+    // TODO: Fetch tasks list from database
     try {
       final response = await http.get(base_url);
       Task data;
       if (response.statusCode == 200) {
-        // If server returns OK response, parse the JSON
         final jsonData = json.decode(response.body);
         setState(() {
-          data = Task.fromMap(jsonData); // For example, showing a 'title' field
+          data = Task.fromMap(jsonData);
         });
       }
     } catch (e) {

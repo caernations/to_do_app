@@ -21,7 +21,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  String _endTime = "9:30 PM";
+  String _endTime = "9:30 PM"; // ! hard-coded, but can be changed.
   String _startTime = DateFormat("hh:mm a").format(DateTime.now()).toString();
 
   int _selectedColor = 0;
@@ -29,17 +29,19 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
 
   @override
   void initState() {
+    // TODO: Initiate the widget for task updates
     super.initState();
     _titleController.text = widget.task.title ?? '';
     _noteController.text = widget.task.note ?? '';
-    _selectedDate = widget.task.date; // Directly assign DateTime
+    _selectedDate = widget.task.date;
     _startTime = widget.task.startTime ?? _startTime;
     _endTime = widget.task.endTime ?? _endTime;
-    _selectedColor = widget.task.color; // Assuming task.color is an int
+    _selectedColor = widget.task.color;
   }
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Define container & input fields for task updates (same as add task)
     return Scaffold(
       appBar: _appBar(),
       body: Container(
@@ -116,11 +118,11 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   }
 
   _validateData() async {
+    // TODO: Validate data (input fields can't be empty)
     setState(() {
       _isLoading = true;
     });
     if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
-      // Print task to the terminal
       print("Task Title: ${_titleController.text}");
       print("Task Note: ${_noteController.text}");
       print("Task Date: ${DateFormat.yMd().format(_selectedDate)}");
@@ -128,19 +130,18 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
       print("End Time: $_endTime");
       print("Color: $_selectedColor");
 
-      // Create Task Map to send to the API
       Map<String, dynamic> task = {
         "title": _titleController.text,
         "note": _noteController.text,
-        "isCompleted": false, // Change this as per your requirement
+        "isCompleted": false,
         "date": _selectedDate.toIso8601String(),
         "startTime": _startTime,
         "endTime": _endTime,
         "color": _selectedColor,
       };
 
-      // Update task in the API
       final response = await http.put(
+        // TODO: Update database with the updated data
         Uri.parse(
             'https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/update-to_do_list/${widget.task.id}'),
         headers: {
@@ -153,16 +154,13 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
       print(response.statusCode);
       print(widget.task.id);
 
-      // Check response from API
       if (response.statusCode == 200) {
         print("Task successfully updated in the database.");
-        // Navigate back to home page and pass a signal to refresh the task list
         Get.back(result: true);
       } else {
         print("Failed to update task. ${response.body}");
       }
     } else {
-      // Show error if input is invalid
       Get.snackbar(
         "Required",
         "All fields required!",
@@ -178,6 +176,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   }
 
   _colorPalette() {
+    // TODO: Select color for task list container
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -223,6 +222,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   }
 
   _appBar() {
+    // TODO: Define the appbar
     return AppBar(
       elevation: 0,
       leading: GestureDetector(
@@ -243,6 +243,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   }
 
   _getDateFromUser() async {
+    // TODO: Input date for task
     DateTime? _pickerDate = await showDatePicker(
         context: context,
         initialDate: _selectedDate,
@@ -260,6 +261,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   }
 
   _getTimeFromUser(bool isStartTime) async {
+    // TODO: Input time for task
     var _pickedTime = await _showTimePicker();
     String _formattedTime = _pickedTime.format(context);
     if (_pickedTime == null) {
@@ -276,6 +278,7 @@ class _UpdateTaskPageState extends State<UpdateTaskPage> {
   }
 
   _showTimePicker() {
+    // TODO: Parse time
     return showTimePicker(
         initialEntryMode: TimePickerEntryMode.input,
         context: context,

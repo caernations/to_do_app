@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-
 import '../theme.dart';
 
 class InputField extends StatelessWidget {
@@ -20,6 +19,7 @@ class InputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Define the input fields for tasks
     return Container(
       margin: EdgeInsets.only(top: 16),
       child: Column(

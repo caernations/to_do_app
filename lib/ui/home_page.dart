@@ -8,7 +8,6 @@ import 'package:to_do_app/services/theme_services.dart';
 import 'package:to_do_app/ui/add_task_bar.dart';
 import 'package:to_do_app/ui/theme.dart';
 import 'package:to_do_app/ui/update_task.dart';
-import 'package:to_do_app/ui/widgets/button.dart';
 import 'package:to_do_app/services/models.dart';
 import 'package:http/http.dart' as http;
 
@@ -52,6 +51,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _addDateBar() {
+    // TODO: Define the date bar (calendar below the appbar)
     return Container(
       margin: const EdgeInsets.only(top: 20, left: 10),
       child: DatePicker(
@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
         ),
         onDateChange: (date) {
           setState(() {
-            _selectedDate = date; // Make sure state updates on date change
+            _selectedDate = date;
           });
         },
       ),
@@ -80,6 +80,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _fetchToDo() async {
+    // TODO: Fetch tasks list from database
     setState(() {
       _isLoading = true;
     });
@@ -103,6 +104,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _addTaskBar() {
+    // TODO: Define the "add task" bar & button
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(16),
@@ -168,17 +170,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Delete task from the server
   _deleteTask(int? taskId) async {
+    // TODO: Delete task from database and homepage
     setState(() {
-      _isLoading = true; // Show loading indicator while deleting
+      _isLoading = true;
     });
     try {
       final response = await http.delete(Uri.parse(
           'https://to-do-app-api-4gdtqcnt5-jasmines-projects-f07974e7.vercel.app/delete-to_do_list/$taskId'));
       if (response.statusCode == 200) {
         print('Task deleted successfully');
-        // After deleting, refresh the task list
         _fetchToDo();
       } else {
         print('Failed to delete task with status code: ${response.statusCode}');
@@ -187,13 +188,13 @@ class _HomePageState extends State<HomePage> {
       print("Error deleting task: $e");
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator after deletion
+        _isLoading = false;
       });
     }
   }
 
-  // Confirm delete dialog
   Future<bool> _showDeleteConfirmationDialog(String? taskTitle) async {
+    // TODO: Ask for user's confirmation on task deletion
     return await showDialog<bool>(
       context: context,
       builder: (context) =>
@@ -213,10 +214,11 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
     ) ??
-        false; // Return false if dialog is dismissed
+        false;
   }
 
   _appBar() {
+    // TODO: Define the appbar
     return AppBar(
       elevation: 0,
       leading: GestureDetector(
@@ -240,6 +242,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showTaskList() {
+    // TODO: Fetch tasks list from database & display it with date filter
     List<Task> filteredTasks = listTask.where((task) {
       DateTime taskDate = task.date ?? DateTime.now();
       String formattedTaskDate = DateFormat.yMd().format(taskDate);
@@ -259,6 +262,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _showTaskDetailsDialog(Task task) {
+    // TODO: Show task details when one of the task list clicked
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -307,7 +311,7 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text(
                 'Close',
@@ -321,6 +325,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _taskTile(Task task) {
+    // TODO: Define the task container
     return GestureDetector(
       onTap: () {
         _showTaskDetailsDialog(task);
@@ -361,7 +366,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               const SizedBox(height: 12),
-              // Completion Status and Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -407,11 +411,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-
-
-// Function to update task status in backend
   Future<void> _updateTaskStatus(int? taskId, bool? isCompleted) async {
+    // TODO: Updating the task status when checkbox is checked
     try {
       // Toggle the completion status
       bool updatedStatus = !(isCompleted ?? false);
@@ -424,7 +425,6 @@ class _HomePageState extends State<HomePage> {
           'Authorization': 'sbp_60f95df07af3b87486bcc73956b5dfd0df9aea9d'
         },
 
-        // Send the updated status
         body: jsonEncode({"isCompleted": updatedStatus}),
       );
 
