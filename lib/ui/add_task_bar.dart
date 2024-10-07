@@ -37,18 +37,18 @@ class _AddTaskPageState extends State<AddTaskPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Add Task",
-              style: headingStyle,),
+                style: headingStyle,),
               InputField(title: "Title", hint: "Enter your title", controller: _titleController,),
               InputField(title: "Note", hint: "Enter your Note", controller: _noteController,),
               InputField(title: "Date", hint: DateFormat.yMd().format(_selectedDate),
-              widget: IconButton(
-                icon: Icon(Icons.calendar_today_outlined,
-                color: Colors.grey),
-                onPressed: () {
-                  _getDateFromUser();
+                  widget: IconButton(
+                    icon: Icon(Icons.calendar_today_outlined,
+                        color: Colors.grey),
+                    onPressed: () {
+                      _getDateFromUser();
 
-                },
-              )),
+                    },
+                  )),
               Row(
                 children: [
                   Expanded(
@@ -94,9 +94,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
       Map<String, dynamic> task = {
         "title": _titleController.text,
         "note": _noteController.text,
+        "isCompleted": false,
         "date": _selectedDate.toIso8601String(),
-        "start_time": _startTime,
-        "end_time": _endTime,
+        "startTime": _startTime,
+        "endTime": _endTime,
         "color": _selectedColor
       };
 

@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
           _addTaskBar(),
           _addDateBar(),
           SizedBox(height: 20,),
-          Expanded(child: _showTaskList()),  // Use Expanded here
+          Expanded(child: _showTaskList()), // Use Expanded here
         ],
       ),
     );
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey)),
         onDateChange: (date) {
           setState(() {
-            _selectedDate = date;  // Make sure state updates on date change
+            _selectedDate = date; // Make sure state updates on date change
           });
         },
       ),
@@ -93,7 +93,8 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {
       print("Error fetching tasks: $e");
-    } setState(() {
+    }
+    setState(() {
       _isLoading = false;
     });
   }
@@ -162,20 +163,22 @@ class _HomePageState extends State<HomePage> {
   Future<bool> _showDeleteConfirmationDialog(String? taskTitle) async {
     return await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: Text('Are you sure you want to delete the task "$taskTitle"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+      builder: (context) =>
+          AlertDialog(
+            title: const Text('Delete Task'),
+            content: Text(
+                'Are you sure you want to delete the task "$taskTitle"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     ) ??
         false; // Return false if dialog is dismissed
   }
@@ -204,17 +207,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showTaskList() {
+    // Filter tasks by selected date
+    List<Task> filteredTasks = listTask.where((task) {
+      // Convert the task date to a String and then parse it back to DateTime
+      DateTime taskDate = task.date ?? DateTime.now(); // Use a default value if task.date is null
+      String formattedTaskDate = DateFormat.yMd().format(taskDate); // Convert DateTime to String
+      return formattedTaskDate == DateFormat.yMd().format(_selectedDate);
+    }).toList();
+
     return _isLoading
         ? Center(
       child: CircularProgressIndicator(), // Display loading animation
     )
+        : filteredTasks.isEmpty
+        ? Center(child: Text("No tasks for the selected date."))
         : ListView.builder(
-      itemCount: listTask.length,
+      itemCount: filteredTasks.length,
       itemBuilder: (context, index) {
-        return _taskTile(listTask[index]);
+        return _taskTile(filteredTasks[index]);
       },
     );
   }
+
 
   Widget _taskTile(Task task) {
     return Card(
@@ -279,17 +293,20 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Checkbox(
                   value: task.isCompleted ?? false,
-                  onChanged: (bool? newValue) {
+                  onChanged: (bool? newValue) async {
                     setState(() {
                       task.isCompleted = newValue!;
-                      // Add logic to update task status in backend
                     });
+
+                    // Call the function to update task status in backend
+                    await _updateTaskStatus(task.id, task.isCompleted);
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.redAccent),
                   onPressed: () async {
-                    bool shouldDelete = await _showDeleteConfirmationDialog(task.title);
+                    bool shouldDelete = await _showDeleteConfirmationDialog(
+                        task.title);
                     if (shouldDelete) {
                       _deleteTask(task.id); // Delete task from database
                     }
@@ -301,5 +318,33 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+// Function to update task status in backend
+  Future<void> _updateTaskStatus(int? taskId, bool? isCompleted) async {
+    try {
+      // Toggle the completion status
+      bool updatedStatus = !(isCompleted ?? false);
+
+      final response = await http.patch(
+        Uri.parse(
+            'https://to-do-app-api-35tym5f4b-jasmines-projects-f07974e7.vercel.app/update-to_do_list/$taskId'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'sbp_60f95df07af3b87486bcc73956b5dfd0df9aea9d'
+        },
+
+        // Send the updated status
+        body: jsonEncode({"isCompleted": updatedStatus}),
+      );
+
+      if (response.statusCode == 200) {
+        print('Task status updated successfully to $updatedStatus');
+      } else {
+        print('Failed to update task status with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error updating task status: $e");
+    }
   }
 }
